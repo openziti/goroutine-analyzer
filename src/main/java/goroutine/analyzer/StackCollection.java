@@ -53,7 +53,7 @@ public class StackCollection implements TreeElement {
         if (!primary) {
             result.add(new ContextAction("Delete", () -> {
                 parent.collections.remove(this);
-                return new TreeElement[]{this.GetParent()};
+                return new ActionResult(this.parent, this.parent);
             }));
         } else {
             result.add(new ContextAction("Reset", () -> {
@@ -62,7 +62,7 @@ public class StackCollection implements TreeElement {
                 for (var stack : parent.stacks) {
                     this.stacks.add(stack.duplicate(this));
                 }
-                return new TreeElement[]{parent};
+                return new ActionResult(this.parent, this);
             }));
         }
 
@@ -85,18 +85,18 @@ public class StackCollection implements TreeElement {
                     parent.collections.add(newCollection);
                 }
             }
-            return new TreeElement[]{this.GetParent()};
+            return new ActionResult(this.parent, this);
         }));
 
         if (!showHidden) {
             result.add(new ContextAction("Show Hidden Goroutines", () -> {
                 showHidden = true;
-                return new TreeElement[]{parent};
+                return new ActionResult(this.parent, this);
             }));
         } else {
             result.add(new ContextAction("Stop Showing Hidden Goroutines", () -> {
                 showHidden = false;
-                return new TreeElement[]{parent};
+                return new ActionResult(this.parent, this);
             }));
         }
 

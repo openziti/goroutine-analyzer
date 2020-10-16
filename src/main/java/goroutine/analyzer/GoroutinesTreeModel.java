@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class GoroutinesTreeModel implements TreeModel {
-    private final Root root = new Root();
+    final Root root = new Root();
 
     private final List<TreeModelListener> listeners = Collections.synchronizedList(new ArrayList<>());
 
@@ -88,15 +88,15 @@ public class GoroutinesTreeModel implements TreeModel {
         listeners.forEach(listener -> listener.treeStructureChanged(event));
     }
 
-    public void handleChanges(TreeElement[] elements) {
-        for (var element : elements) {
-            for (var i = listeners.size() - 1; i >= 0; i--) {
-                var event = element.GetParent() != null ? new TreeModelEvent(element, element.GetParent().getPath(), null, null) :
-                        new TreeModelEvent(element, element.getPath(), null, null);
-                var listener = listeners.get(i);
-                listener.treeStructureChanged(event);
-            }
+    public void handleChanges(ActionResult result) {
+        var element = result.refresh;
+        for (var i = listeners.size() - 1; i >= 0; i--) {
+            var event = element.GetParent() != null ? new TreeModelEvent(element, element.GetParent().getPath(), null, null) :
+                    new TreeModelEvent(element, element.getPath(), null, null);
+            var listener = listeners.get(i);
+            listener.treeStructureChanged(event);
         }
+
     }
 
     private static Object[] toArr(Object... obj) {

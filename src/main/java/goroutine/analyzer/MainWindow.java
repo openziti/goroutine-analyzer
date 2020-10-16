@@ -1,5 +1,8 @@
 package goroutine.analyzer;
 
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -51,9 +54,9 @@ public class MainWindow {
      */
     private void $$$setupUI$$$() {
         mainFrame = new JPanel();
-        mainFrame.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        mainFrame.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         final JSplitPane splitPane1 = new JSplitPane();
-        mainFrame.add(splitPane1, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(1024, 768), null, 0, false));
+        mainFrame.add(splitPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(1024, 768), null, 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
         scrollPane1.setMinimumSize(new Dimension(300, 15));
         splitPane1.setLeftComponent(scrollPane1);
@@ -163,13 +166,13 @@ public class MainWindow {
             for (var contextAction : actions) {
                 JMenuItem item = new JMenuItem(contextAction.label);
                 item.addActionListener(event -> ForkJoinPool.commonPool().execute(() -> {
-                    var results = contextAction.action.execute();
-                    if (results != null) {
-                        treeModel.handleChanges(results);
-
-                        for (var element : results) {
-                            routines.expandPath(new TreePath(element.getPath()));
-                        }
+                    var result = contextAction.action.execute();
+                    if (result != null) {
+                        treeModel.handleChanges(result);
+                        SwingUtilities.invokeLater(() -> {
+                            routines.expandPath(new TreePath(treeModel.root));
+                            routines.expandPath(new TreePath(result.focus.getPath()));
+                        });
                     }
                 }));
                 menu.add(item);
@@ -181,6 +184,7 @@ public class MainWindow {
     private void init() {
         routines.setModel(treeModel);
         routines.setFont(new Font("Courier", Font.PLAIN, 14));
+        routines.setExpandsSelectedPaths(true);
         routines.addTreeSelectionListener(new ElementSelectionListener());
         routines.setShowsRootHandles(true);
         routines.addMouseListener(new TreeMouseListener());

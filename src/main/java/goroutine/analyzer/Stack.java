@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Stack implements TreeElement, Comparable<Stack> {
@@ -40,6 +41,19 @@ public class Stack implements TreeElement, Comparable<Stack> {
             }
         }
         return true;
+    }
+
+    public boolean matches(Predicate<String> matcher) {
+        if (matcher.test(header.header)) {
+            return true;
+        }
+
+        for (var elem : elements) {
+            if (matcher.test(elem.codeLine) || matcher.test(elem.sourceLine)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public Stack duplicate(StackCollection collection) {
@@ -136,14 +150,14 @@ public class Stack implements TreeElement, Comparable<Stack> {
             parent.stacks.removeAll(selectedStacks);
             var newCollection = new StackCollection(false, this.parent.parent, this.getGroupName(), selectedStacks);
             this.parent.parent.collections.add(newCollection);
-            return new TreeElement[]{this.parent.parent};
+            return new ActionResult(this.parent.parent, newCollection);
         }));
 
         result.add(new ContextAction("Group Goroutines Like This", () -> {
             var selectedStacks = findSimilar(this.parent);
             var newCollection = new StackCollection(false, this.parent.parent, this.getGroupName(), selectedStacks);
             this.parent.parent.collections.add(newCollection);
-            return new TreeElement[]{this.parent.parent};
+            return new ActionResult(this.parent.parent, newCollection);
         }));
 
         result.add(new ContextAction("Hide Goroutines Like This", () -> {
@@ -151,18 +165,18 @@ public class Stack implements TreeElement, Comparable<Stack> {
             for (var stack : selectedStacks) {
                 stack.hidden = true;
             }
-            return new TreeElement[]{this.parent};
+            return new ActionResult(this.parent, this);
         }));
 
         if (isVisible()) {
             result.add(new ContextAction("Hide Goroutine", () -> {
                 this.hidden = true;
-                return new TreeElement[]{this.parent.parent};
+                return new ActionResult(this.parent, this.parent);
             }));
         } else {
             result.add(new ContextAction("Unhide Goroutine", () -> {
                 this.hidden = false;
-                return new TreeElement[]{this.parent.parent};
+                return new ActionResult(this.parent, this);
             }));
         }
 

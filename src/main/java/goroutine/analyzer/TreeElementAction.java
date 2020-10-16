@@ -1,5 +1,5 @@
 package goroutine.analyzer;
 
 public interface TreeElementAction {
-    TreeElement[] execute();
+    ActionResult execute();
 }

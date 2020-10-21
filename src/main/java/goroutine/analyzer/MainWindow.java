@@ -94,7 +94,9 @@ public class MainWindow {
 
             var stacks = new TreeSet<Stack>();
             for (var elem : selected) {
-                elem.addStacks(stacks);
+                if (!(elem instanceof StackDump) && !(elem instanceof Root)) {
+                    elem.addStacks(stacks);
+                }
             }
 
             var doc = stackDisplay.getDocument();
@@ -170,8 +172,13 @@ public class MainWindow {
                     if (result != null) {
                         treeModel.handleChanges(result);
                         SwingUtilities.invokeLater(() -> {
-                            routines.expandPath(new TreePath(treeModel.root));
-                            routines.expandPath(new TreePath(result.focus.getPath()));
+                            var focusPath = result.focus.getPath();
+                            for (var i = 0; i < focusPath.length; i++) {
+                                System.out.printf("focus path %d: %s - %s\n", i, focusPath[i].getClass().getName(), focusPath[i].toString());
+                            }
+                            var treePath = new TreePath(focusPath);
+                            routines.expandPath(treePath);
+                            routines.setSelectionPath(treePath);
                         });
                     }
                 }));

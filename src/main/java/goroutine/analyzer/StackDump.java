@@ -1,5 +1,6 @@
 package goroutine.analyzer;
 
+import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,8 +61,10 @@ public class StackDump implements TreeElement {
         result.add(new ContextAction("Create Filter", () -> {
             var future = new CompletableFuture<NewFilterDialog.NameFilter>();
             var dialog = new NewFilterDialog(future);
-            dialog.pack();
-            dialog.setVisible(true);
+            SwingUtilities.invokeLater(() -> {
+                dialog.pack();
+                dialog.setVisible(true);
+            });
             try {
                 var filterDef = future.get();
                 var collection = filter(filterDef.name, filterDef.filter);

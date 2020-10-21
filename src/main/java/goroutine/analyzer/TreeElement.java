@@ -21,7 +21,7 @@ public interface TreeElement {
 
         var current = this;
         while (current != null) {
-            list.add(this);
+            list.add(0, current);
             current = current.GetParent();
         }
         return list.toArray();

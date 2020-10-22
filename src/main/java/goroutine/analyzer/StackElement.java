@@ -25,4 +25,20 @@ public class StackElement {
                 Objects.equals(method, o.method) &&
                 Objects.equals(path, o.path);
     }
+
+    @Override
+    public String toString() {
+        return "StackElement{" +
+                "createdBy=" + createdBy +
+                ", shortPkg='" + shortPkg + '\'' +
+                ", pkg='" + pkg + '\'' +
+                ", receiver='" + receiver + '\'' +
+                ", method='" + method + '\'' +
+                ", args=" + args +
+                ", path='" + path + '\'' +
+                ", line=" + line +
+                ", codeLine='" + codeLine + '\'' +
+                ", sourceLine='" + sourceLine + '\'' +
+                '}';
+    }
 }

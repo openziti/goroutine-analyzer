@@ -12,10 +12,13 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ForkJoinPool;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 public class MainWindow {
     private final GoroutinesTreeModel treeModel = new GoroutinesTreeModel();
@@ -28,6 +31,8 @@ public class MainWindow {
     private final SimpleAttributeSet headerStyle;
     private final SimpleAttributeSet bodyStyle;
 
+    private File lastDir = null;
+
     {
         headerStyle = new SimpleAttributeSet();
         StyleConstants.setFontFamily(headerStyle, "Courier");
@@ -36,6 +41,25 @@ public class MainWindow {
         bodyStyle = new SimpleAttributeSet();
         StyleConstants.setFontFamily(bodyStyle, "Courier");
         StyleConstants.setBold(bodyStyle, false);
+        loadLastDir();
+    }
+
+    private void loadLastDir() {
+        var prefs = Preferences.userNodeForPackage(MainWindow.class);
+        var lastDirName = prefs.get("last.dir", null);
+        if (lastDirName != null) {
+            lastDir = new File(lastDirName);
+        }
+    }
+
+    private void setLastDir(File lastDir) {
+        var prefs = Preferences.userNodeForPackage(MainWindow.class);
+        prefs.put("last.dir", lastDir.getAbsolutePath());
+        try {
+            prefs.sync();
+        } catch (BackingStoreException e) {
+            e.printStackTrace();
+        }
     }
 
     {
@@ -119,6 +143,9 @@ public class MainWindow {
 
     private void loadFile() {
         final var chooser = new JFileChooser();
+        if (lastDir != null) {
+            chooser.setCurrentDirectory(lastDir);
+        }
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setMultiSelectionEnabled(true);
         var result = chooser.showOpenDialog(frame);
@@ -126,7 +153,12 @@ public class MainWindow {
         if (result == JFileChooser.APPROVE_OPTION) {
             ForkJoinPool.commonPool().execute(() -> {
                 try {
-                    treeModel.openFiles(chooser.getSelectedFiles());
+                    var files = chooser.getSelectedFiles();
+                    if (files.length > 0) {
+                        lastDir = files[0].getParentFile();
+                        setLastDir(lastDir);
+                    }
+                    treeModel.openFiles(files);
                 } catch (Exception e) {
                     e.printStackTrace();
                     SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE));
@@ -173,11 +205,8 @@ public class MainWindow {
                         treeModel.handleChanges(result);
                         SwingUtilities.invokeLater(() -> {
                             var focusPath = result.focus.getPath();
-                            for (var i = 0; i < focusPath.length; i++) {
-                                System.out.printf("focus path %d: %s - %s\n", i, focusPath[i].getClass().getName(), focusPath[i].toString());
-                            }
                             var treePath = new TreePath(focusPath);
-                            routines.expandPath(treePath);
+                            routines.expandPath(treePath.getParentPath());
                             routines.setSelectionPath(treePath);
                         });
                     }

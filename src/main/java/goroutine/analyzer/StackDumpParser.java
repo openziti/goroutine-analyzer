@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public class StackDumpParser {
     private final Pattern stackStart = Pattern.compile("^goroutine (\\d+) \\[([^,]+)(, (\\d+) minutes)?]:$");
-    private final Pattern elemFirst = Pattern.compile("^(created by )?(?:(.*/)*)?([^.]+)(?:\\.(.*))?\\.([^(]*)(?:\\((.*)\\))?");
+    private final Pattern elemFirst = Pattern.compile("^(created by )?(?:(.*/)*)?([^.]+)(?:\\.([^.]+))?\\.([^(]*)(?:\\((.*)\\))?");
     private final Pattern sourcePattern = Pattern.compile("\\w*(.+):(\\d+).*");
 
     private final List<Stack> stacks = new ArrayList<>();
@@ -70,7 +70,7 @@ public class StackDumpParser {
         if (elem != null) {
             var sourceMatcher = sourcePattern.matcher(line);
             if (sourceMatcher.matches()) {
-                elem.path = sourceMatcher.group(1);
+                elem.path = sourceMatcher.group(1).trim();
                 elem.line = Integer.parseInt(sourceMatcher.group(2));
                 elem.sourceLine = line;
                 elem = null;

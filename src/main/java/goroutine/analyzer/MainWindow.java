@@ -126,6 +126,8 @@ public class MainWindow {
             var doc = stackDisplay.getDocument();
             try {
                 doc.remove(0, doc.getLength());
+                var count = 0;
+                var maxCount = 250;
                 for (var stack : stacks) {
                     doc.insertString(doc.getLength(), stack.header.header + "\n", headerStyle);
                     for (var elem : stack.elements) {
@@ -133,6 +135,12 @@ public class MainWindow {
                         doc.insertString(doc.getLength(), elem.sourceLine + "\n", bodyStyle);
                     }
                     doc.insertString(doc.getLength(), "\n", headerStyle);
+                    if (count++ > maxCount) {
+                        break;
+                    }
+                }
+                if (stacks.size() > maxCount) {
+                    doc.insertString(doc.getLength(), "\nTOO MANY STACKS: stopping after 250\n", headerStyle);
                 }
                 stackDisplay.setCaretPosition(0);
             } catch (Exception e) {

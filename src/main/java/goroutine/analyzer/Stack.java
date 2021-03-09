@@ -14,7 +14,7 @@ public class Stack implements TreeElement, Comparable<Stack> {
 
     boolean hidden;
 
-    public Stack(StackCollection parent, int id, State state, int time, String header) {
+    public Stack(StackCollection parent, String id, State state, int time, String header) {
         this.parent = parent;
         this.header = new StackHeader(id, state, time, header);
         this.elements = new ArrayList<>(2);
@@ -131,7 +131,7 @@ public class Stack implements TreeElement, Comparable<Stack> {
 
     @Override
     public int compareTo(Stack o) {
-        return header.id - o.header.id;
+        return header.id.compareTo(o.header.id);
     }
 
     public boolean isVisible() {

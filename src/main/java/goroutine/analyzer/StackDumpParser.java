@@ -20,7 +20,7 @@ public class StackDumpParser {
 
         var startMatcher = stackStart.matcher(line);
         if (startMatcher.matches()) {
-            var id = Integer.parseInt(startMatcher.group(1));
+            var id = startMatcher.group(1);
             var state = State.getState(startMatcher.group(2));
             var time = 0;
 
@@ -30,7 +30,7 @@ public class StackDumpParser {
             current = new Stack(null, id, state, time, line);
             stacks.add(current);
 
-            System.out.printf("goroutine %d [%s, %d minutes]\n", current.header.id, current.header.state, current.header.time);
+            System.out.printf("goroutine %s [%s, %d minutes]\n", current.header.id, current.header.state, current.header.time);
             return;
         }
 

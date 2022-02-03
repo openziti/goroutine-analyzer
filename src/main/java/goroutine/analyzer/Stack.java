@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -32,7 +33,7 @@ public class Stack implements TreeElement, Comparable<Stack> {
         }
 
         if (elements.isEmpty()) {
-            return stack.header.id == header.id;
+            return stack.header.id.equals(header.id);
         }
 
         for (var i = 0; i < elements.size(); i++) {
@@ -145,38 +146,38 @@ public class Stack implements TreeElement, Comparable<Stack> {
     public List<ContextAction> getContextActions() {
         var result = new ArrayList<ContextAction>();
 
-        result.add(new ContextAction("Separate Goroutines Like This", () -> {
+        result.add(new ContextAction("Separate Goroutines Like This", (Consumer<ActionResult> handler) -> {
             var selectedStacks = findSimilar(this.parent);
             parent.stacks.removeAll(selectedStacks);
-            var newCollection = new StackCollection(false, this.parent.parent, this.getGroupName(), selectedStacks);
+            var newCollection = new StackCollection(false, this.parent.parent, this.getGroupName(), selectedStacks, null);
             this.parent.parent.collections.add(newCollection);
-            return new ActionResult(this.parent.parent, newCollection);
+            handler.accept(new ActionResult(this.parent.parent, newCollection, false));
         }));
 
-        result.add(new ContextAction("Group Goroutines Like This", () -> {
+        result.add(new ContextAction("Group Goroutines Like This", (Consumer<ActionResult> handler) -> {
             var selectedStacks = findSimilar(this.parent);
-            var newCollection = new StackCollection(false, this.parent.parent, this.getGroupName(), selectedStacks);
+            var newCollection = new StackCollection(false, this.parent.parent, this.getGroupName(), selectedStacks, null);
             this.parent.parent.collections.add(newCollection);
-            return new ActionResult(this.parent.parent, newCollection);
+            handler.accept(new ActionResult(this.parent.parent, newCollection, false));
         }));
 
-        result.add(new ContextAction("Hide Goroutines Like This", () -> {
+        result.add(new ContextAction("Hide Goroutines Like This", (Consumer<ActionResult> handler) -> {
             var selectedStacks = findSimilar(this.parent);
             for (var stack : selectedStacks) {
                 stack.hidden = true;
             }
-            return new ActionResult(this.parent, this);
+            handler.accept(new ActionResult(this.parent, this.parent, true));
         }));
 
         if (isVisible()) {
-            result.add(new ContextAction("Hide Goroutine", () -> {
+            result.add(new ContextAction("Hide Goroutine", (Consumer<ActionResult> handler) -> {
                 this.hidden = true;
-                return new ActionResult(this.parent, this.parent);
+                handler.accept(new ActionResult(this.parent, this.parent, true));
             }));
         } else {
-            result.add(new ContextAction("Unhide Goroutine", () -> {
+            result.add(new ContextAction("Unhide Goroutine", (Consumer<ActionResult> handler) -> {
                 this.hidden = false;
-                return new ActionResult(this.parent, this);
+                handler.accept(new ActionResult(this.parent, this, false));
             }));
         }
 

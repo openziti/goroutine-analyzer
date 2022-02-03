@@ -3,6 +3,7 @@ package goroutine.analyzer;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
+import javax.naming.Context;
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -13,9 +14,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -197,25 +197,80 @@ public class MainWindow {
             if (!SwingUtilities.isRightMouseButton(e)) {
                 return;
             }
-            var path = routines.getClosestPathForLocation(e.getX(), e.getY());
-            var elem = (TreeElement) path.getLastPathComponent();
-            var actions = elem.getContextActions();
+
+            // If nothing is selected
+            //     and we click somewhere that's not an element, don't do anything
+            //     and we click on an element, act on that element
+            // If something is selected
+            //     and we click somewhere not on an element, act on selected elements
+            //     and we clock on an element
+            //         and the clicked element is not selected, act on the clicked element
+            //         and the clicked element is selected, act on all selected elements
+            var actions = new TreeMap<String, List<ContextAction>>();
+
+            var first = true;
+            var paths = routines.getSelectionPaths();
+            var clickedPath = routines.getPathForLocation(e.getX(),e.getY());
+
+            if (clickedPath != null && paths != null) {
+                if (!Arrays.stream(paths).anyMatch( treePath -> treePath.equals(clickedPath))) {
+                    paths = new TreePath[]{clickedPath};
+                }
+            }
+
+            if (paths == null) {
+                if (clickedPath != null) {
+                    paths = new TreePath[]{clickedPath};
+                } else {
+                    return;
+                }
+            }
+
+            for (var path : paths) {
+                var elem = (TreeElement) path.getLastPathComponent();
+                if (first) {
+                    for (var action : elem.getContextActions()) {
+                        var list = new ArrayList<ContextAction>();
+                        list.add(action);
+                        actions.put(action.label, list);
+                    }
+                } else {
+                    for (var action : elem.getContextActions()) {
+                        var list = actions.get(action.label);
+                        if (list != null) {
+                            list.add(action);
+                        }
+                    }
+                }
+                first = false;
+            }
+
+            var effectivePaths = paths;
+            actions.entrySet().removeIf(entry -> entry.getValue().size() != effectivePaths.length);
+
             if (actions.isEmpty()) {
                 return;
             }
 
             JPopupMenu menu = new JPopupMenu();
-            for (var contextAction : actions) {
-                JMenuItem item = new JMenuItem(contextAction.label);
-                item.addActionListener(event -> ForkJoinPool.commonPool().execute(() -> {
-                    var result = contextAction.action.execute();
-                    if (result != null) {
-                        treeModel.handleChanges(result);
-                        SwingUtilities.invokeLater(() -> {
-                            var focusPath = result.focus.getPath();
-                            var treePath = new TreePath(focusPath);
-                            routines.expandPath(treePath.getParentPath());
-                            routines.setSelectionPath(treePath);
+            for (var entry : actions.entrySet()) {
+                JMenuItem item = new JMenuItem(entry.getKey());
+                item.addActionListener(event -> SwingUtilities.invokeLater(() -> {
+                    for (var contextAction : entry.getValue()) {
+                        contextAction.action.execute(result -> {
+                        if (result != null) {
+                            SwingUtilities.invokeLater(() -> {
+                                treeModel.handleChanges(result);
+                                var focusPath = result.focus.getPath();
+                                var treePath = new TreePath(focusPath);
+                                if (result.expandFocus) {
+                                    routines.expandPath(treePath);
+                                } else {
+                                    routines.expandPath(treePath.getParentPath());
+                                }
+                                routines.setSelectionPath(treePath);
+                            });
+                        }
                         });
                     }
                 }));

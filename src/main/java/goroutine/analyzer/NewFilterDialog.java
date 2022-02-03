@@ -9,36 +9,36 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class NewFilterDialog extends JDialog {
-    static class NameFilter {
-        final String name;
-        final String filter;
-
-        public NameFilter(String name, String filter) {
-            this.name = name;
-            this.filter = filter;
-        }
-    }
 
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
     private JTextField nameField;
     private JTextField filterField;
+    
+    public NewFilterDialog(Consumer<NameFilter> handler) {
+        this(handler, null, null);
+    }
 
-    private CompletableFuture<NameFilter> future;
-
-    public NewFilterDialog(CompletableFuture<NameFilter> future) {
-        this.future = future;
+    public NewFilterDialog(Consumer<NameFilter> handler, String name, String filter) {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
+        if (name != null) {
+            nameField.setText(name);
+        }
+
+        if (filter != null) {
+            filterField.setText(filter);
+        }
+
         buttonOK.addActionListener(e -> {
             dispose();
-            future.complete(new NameFilter(nameField.getText(), filterField.getText()));
+            handler.accept(new NameFilter(nameField.getText(), filterField.getText()));
         });
 
         buttonCancel.addActionListener(e -> onCancel());
@@ -58,12 +58,11 @@ public class NewFilterDialog extends JDialog {
     }
 
     private void onCancel() {
-        future.cancel(true);
         dispose();
     }
 
     public static void main(String[] args) {
-        NewFilterDialog dialog = new NewFilterDialog(new CompletableFuture<>());
+        NewFilterDialog dialog = new NewFilterDialog(System.out::println);
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);

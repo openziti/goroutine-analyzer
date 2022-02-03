@@ -1,5 +1,7 @@
 package goroutine.analyzer;
 
+import java.util.function.Consumer;
+
 public interface TreeElementAction {
-    ActionResult execute();
+    void execute(Consumer<ActionResult> handler);
 }

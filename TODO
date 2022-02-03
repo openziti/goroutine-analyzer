@@ -1,0 +1,7 @@
+* Add support for finding old goroutines
+* Add support for sorting by age
+* Add support for subfolders, so when you manipulate a collection, the derived collections become children not siblings
+* Add support for limiting child counts and letting the user expand
+* Add support for selecting text in the goroutine display area and creating a filter
+* Add support for creating/saving filters to a config file
+* Add support for diffing two stack dumps

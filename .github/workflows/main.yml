@@ -7,6 +7,9 @@ on:
       - release-v*
   workflow_dispatch:
 
+env:
+  gh_ci_key: ${{ secrets.GH_CI_KEY }}
+
 jobs:
   build-linux-installer:
     name: Build Installer on Linux
@@ -36,6 +39,10 @@ jobs:
 # BUILD FOR DISTRIBUTION
     - id: build
       name: Build distribution
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ziti_ci_gpg_key: ${{ secrets.ZITI_CI_GPG_KEY }}
+        ziti_ci_gpg_key_id: ${{ secrets.ZITI_CI_GPG_KEY_ID }}
       run: |
         $(go env GOPATH)/bin/ziti-ci configure-git
         ./gradlew -v

@@ -37,7 +37,7 @@ jobs:
       run: |
         ./gradlew -v
         ./gradlew build
-        ./gradlew copyLibs
+        ./gradlew copyDeps
         jpackage --verbose --app-version $($(go env GOPATH)/ziti-ci -q get-next-version) "@jpackage.cfg" "@jpackage-linux.cfg"
         $(go env GOPATH)/bin/ziti-ci tag -v -f version
         gh release create $($(go env GOPATH)/ziti-ci -q get-current-version) build/distributions/*

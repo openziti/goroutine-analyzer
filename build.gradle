@@ -12,6 +12,8 @@ plugins {
 
     // Apply the application plugin to add support for building an application
     id 'application'
+
+    id "org.panteleyev.jpackageplugin" version "1.3.1"
 }
 
 repositories {
@@ -30,5 +32,47 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
+distTar {
+    compression = Compression.GZIP
+    archiveExtension = "tar.gz"
+}
+
 // Define the main class for the application
 mainClassName = 'goroutine.analyzer.MainWindow'
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+task copyDependencies(type: Copy) {
+    from(configurations.runtimeClasspath).into("$buildDir/jars")
+}
+
+task copyJar(type: Copy) {
+    from(tasks.jar).into("$buildDir/jars")
+}
+
+task copyDeps(type: Copy) {
+    into "${buildDir}/libs"
+    from configurations.runtimeClasspath
+}
+
+tasks.jpackage {
+    dependsOn("build", "copyDependencies", "copyJar")
+
+    input  = "$buildDir/jars"
+    destination = "$buildDir/dist"
+
+    appName = "Non-Modular Application"
+    vendor = "app.org"
+
+    mainJar = tasks.jar.archiveFile
+    mainClass = mainClassName
+
+    javaOptions = ["-Dfile.encoding=UTF-8"]
+
+    windows {
+        winConsole = true
+    }
+}

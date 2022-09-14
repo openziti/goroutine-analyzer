@@ -8,19 +8,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class StackDumpParserTest {
-    @Test
-    public void testStackDump() throws Exception {
-        var path = Paths.get("/home", "plorenz", "tmp", "fabric-freeze", "1", "6dBmMM4MR.0.dump");
-        StackDumpParser parser = new StackDumpParser();
-        Files.lines(path).forEach(parser::processLine);
-        Assert.assertEquals(288, parser.getResults().size());
-
-        for (var stack : parser.getResults()) {
-            stack.dump();
-            System.out.println();
-        }
-    }
-
     String dots = """
             goroutine 1257 [chan receive]:
             github.com/openziti/sdk-golang/ziti/edge.(*MsgChannel).WriteTraced(0xc0002c8bd0, 0xc0232c553e, 0x2800, 0x2800, 0x0, 0x0, 0x0, 0x0, 0x2800, 0x0, ...)

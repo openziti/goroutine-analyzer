@@ -1,0 +1,43 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+      - release-v*
+  workflow_dispatch:
+
+jobs:
+  build-linux-installer:
+    name: Build Installer on Linux
+    runs-on: ubuntu-latest
+    steps:
+
+# SETUP BUILD ENVIRONMENT
+    - id: checkout-code
+      name: Checkout code
+      uses: actions/checkout@v2
+    - id: setup-jdk
+      name: Setup JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 17
+
+    - name: Install Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.19.x'
+
+    - name: Install Ziti CI
+      uses: netfoundry/ziti-ci@v1
+
+# BUILD FOR DISTRIBUTION
+    - id: build
+      name: Build distribution
+      run: |
+        ./gradlew -v
+        ./gradlew build
+        ./gradlew copyLibs
+        jpackage --verbose --app-version $($(go env GOPATH)/ziti-ci -q get-next-version) "@jpackage.cfg" "@jpackage-linux.cfg"
+        $(go env GOPATH)/bin/ziti-ci tag -v -f version
+        gh release create $($(go env GOPATH)/ziti-ci -q get-current-version) build/distributions/*

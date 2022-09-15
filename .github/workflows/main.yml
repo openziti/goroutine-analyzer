@@ -42,7 +42,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        ziti-ci configure-git
         .\gradlew.bat -v
         .\gradlew.bat build
         .\gradlew.bat copyDeps

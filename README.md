@@ -20,13 +20,15 @@ The following are available:
 
 * Windows x64
 * MacOS x64
-  * MacOS M1 support will be provided once GitHub actions provides M1 runners
+  * MacOS M1 support will be provided once GitHub actions provides M1 runners. In the meantime, you can use an 
+    application bundle or just clone and run.
 * Linux .deb 
   * rpm builds are currently unavailable as GitHub actions only provides ubuntu runners. If anyone is interested
     an appimage build would probably be straightforward to add.
 * Application bundles with start scripts if Java is pre-installed on your system
 
-The application can also be run from source by cloning the repository and running `./gradlew run`
+The application can also be run from source by cloning the repository and running `./gradlew run`. I run with 
+Java 17, but it will likely work with older versions as well. 
 
 ## How to use
 ### Opening Stack Dumps

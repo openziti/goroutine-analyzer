@@ -40,11 +40,11 @@ jobs:
     - id: build
       name: Build distribution
       run: |
-        $(go env GOPATH)/bin/ziti-ci configure-git
-        ./gradlew -v
-        ./gradlew build
-        ./gradlew copyDeps
-        jpackage --verbose --app-version $($(go env GOPATH)/bin/ziti-ci -q get-next-version) "@jpackage.cfg" "@jpackage-windows.cfg"
+        $(go env GOPATH)\bin\ziti-ci configure-git
+        gradlew -v
+        gradlew build
+        gradlew copyDeps
+        jpackage --verbose --app-version $($(go env GOPATH)\bin\ziti-ci -q get-next-version) "@jpackage.cfg" "@jpackage-windows.cfg"
 
     - id: upload-installer
       name: Upload installer
@@ -103,7 +103,6 @@ jobs:
     needs : [build-windows-installer, build-mac-installer]
     steps:
 
-# SETUP BUILD ENVIRONMENT
     - id: checkout-code
       name: Checkout code
       uses: actions/checkout@v3

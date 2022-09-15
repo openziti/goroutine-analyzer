@@ -40,7 +40,7 @@ jobs:
     - id: build
       name: Build distribution
       run: |
-        $(go env GOPATH)\bin\ziti-ci configure-git
+        ziti-ci configure-git
         gradlew -v
         gradlew build
         gradlew copyDeps

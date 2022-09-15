@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - release-v*
+  pull_request:
   workflow_dispatch:
 
 env:
@@ -88,6 +89,7 @@ jobs:
         ./gradlew build
         ./gradlew copyDeps
         jpackage --verbose --app-version $($(go env GOPATH)/bin/ziti-ci -q -l java get-next-version) "@jpackage.cfg" "@jpackage-darwin.cfg"
+        mv build/distributions/goroutine-analyzer-$($(go env GOPATH)/bin/ziti-ci -q -l java get-next-version).dmg build/distributions/goroutine-analyzer-$($(go env GOPATH)/bin/ziti-ci -q -l java get-next-version)-amd64.dmg
 
     - id: upload-installer
       name: Upload installer
@@ -147,5 +149,14 @@ jobs:
         ./gradlew build
         ./gradlew copyDeps
         jpackage --verbose --app-version $($(go env GOPATH)/bin/ziti-ci -q -l java get-next-version) "@jpackage.cfg" "@jpackage-linux.cfg"
+
+    - id: publish
+      name: Publish
+      if: github.repository_owner == 'openziti' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release-v'))
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ziti_ci_gpg_key: ${{ secrets.ZITI_CI_GPG_KEY }}
+        ziti_ci_gpg_key_id: ${{ secrets.ZITI_CI_GPG_KEY_ID }}
+      run: |
         $(go env GOPATH)/bin/ziti-ci tag -v -f version
         gh release create $($(go env GOPATH)/bin/ziti-ci -q get-current-version) build/distributions/*

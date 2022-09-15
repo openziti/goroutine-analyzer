@@ -11,9 +11,96 @@ env:
   gh_ci_key: ${{ secrets.GH_CI_KEY }}
 
 jobs:
+
+# WINDOWS BUILD
+  build-windows-installer:
+    name: Build Installer on Windows
+    runs-on: windows-latest
+    steps:
+
+    - id: checkout-code
+      name: Checkout code
+      uses: actions/checkout@v3
+
+    - id: setup-jdk
+      name: Setup JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: 17
+        distribution: temurin
+
+    - name: Install Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.19.x'
+
+    - name: Install Ziti CI
+      uses: netfoundry/ziti-ci@v1
+
+    - id: build
+      name: Build distribution
+      run: |
+        $(go env GOPATH)/bin/ziti-ci configure-git
+        ./gradlew -v
+        ./gradlew build
+        ./gradlew copyDeps
+        jpackage --verbose --app-version $($(go env GOPATH)/bin/ziti-ci -q get-next-version) "@jpackage.cfg" "@jpackage-windows.cfg"
+
+    - id: upload-installer
+      name: Upload installer
+      uses: actions/upload-artifact@v3
+      with:
+        path: ./build/distributions/*.msi
+        name: windows-installer-${{ github.run_id }}
+        retention-days: 1
+
+# MACOS BUILD
+  build-mac-installer:
+    name: Build Installer on MacOS
+    runs-on: macos-latest
+    steps:
+
+    - id: checkout-code
+      name: Checkout code
+      uses: actions/checkout@v3
+
+    - id: setup-jdk
+      name: Setup JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: 17
+        distribution: temurin
+
+    - name: Install Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.19.x'
+
+    - name: Install Ziti CI
+      uses: netfoundry/ziti-ci@v1
+
+    - id: build
+      name: Build distribution
+      run: |
+        $(go env GOPATH)/bin/ziti-ci configure-git
+        ./gradlew -v
+        ./gradlew build
+        ./gradlew copyDeps
+        jpackage --verbose --app-version $($(go env GOPATH)/bin/ziti-ci -q get-next-version) "@jpackage.cfg" 
+
+    - id: upload-installer
+      name: Upload installer
+      uses: actions/upload-artifact@v3
+      with:
+        path: ./build/distributions/*.dmg
+        name: macos-installer-${{ github.run_id }}
+        retention-days: 1
+
+# LINUX BUILD, FINALIZE RELEASE
   build-linux-installer:
     name: Build Installer on Linux
     runs-on: ubuntu-latest
+    needs : [build-windows-installer, build-mac-installer]
     steps:
 
 # SETUP BUILD ENVIRONMENT
@@ -36,7 +123,18 @@ jobs:
     - name: Install Ziti CI
       uses: netfoundry/ziti-ci@v1
 
-# BUILD FOR DISTRIBUTION
+    - name: Download os release artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: macos-installer-${{ github.run_id }}
+        path: build/distributions/
+
+    - name: Download windows release artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: windows-installer-${{ github.run_id }}
+        path: build/distributions/
+
     - id: build
       name: Build distribution
       env:

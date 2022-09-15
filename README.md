@@ -1,7 +1,7 @@
 # goroutine-analyzer
 
 ## Overview
-This is GUI tool for helping analyze golang goroutine dumps. It has the following features:
+This is a GUI tool for helping analyze golang goroutine dumps. It has the following features:
 
 * Working with multiple dumps
 * Grouping, extracting or hiding similar goroutines, either manually or automatically
@@ -84,7 +84,7 @@ the following operations.
 ## Thank you
 This tool was inspired by the following:
 
-* TDA (thread dump analyzer). I tried to find a link to this, but was unable to find the original. Ping me if you've got a link
+* [TDA (thread dump analyzer)](https://github.com/mkbrv/tda) - Original version at https://java.net/projects/tda doesn't seem to be available anymore
 * [goroutine-inspect](https://github.com/linuxerwang/goroutine-inspect)
 
 The build was helped along by [this very helpful example repo from GitHub user sualeh](https://github.com/sualeh/build-jpackage)

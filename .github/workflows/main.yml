@@ -41,9 +41,9 @@ jobs:
       name: Build distribution
       run: |
         ziti-ci configure-git
-        gradlew.bat -v
-        gradlew.bat build
-        gradlew.bat copyDeps
+        .\gradlew.bat -v
+        .\gradlew.bat build
+        .\gradlew.bat copyDeps
         jpackage --verbose --app-version $(ziti-ci -q get-next-version) "@jpackage.cfg" "@jpackage-windows.cfg"
 
     - id: upload-installer

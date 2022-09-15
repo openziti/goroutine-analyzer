@@ -44,7 +44,7 @@ jobs:
         gradlew -v
         gradlew build
         gradlew copyDeps
-        jpackage --verbose --app-version $($(go env GOPATH)\bin\ziti-ci -q get-next-version) "@jpackage.cfg" "@jpackage-windows.cfg"
+        jpackage --verbose --app-version $(ziti-ci -q get-next-version) "@jpackage.cfg" "@jpackage-windows.cfg"
 
     - id: upload-installer
       name: Upload installer

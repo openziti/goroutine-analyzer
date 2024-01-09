@@ -6,6 +6,7 @@
  * user guide available at https://docs.gradle.org/5.1.1/userguide/tutorial_java_projects.html
  */
 
+
 plugins {
     // Apply the java plugin to add support for Java
     id 'java'
@@ -17,9 +18,9 @@ plugins {
 }
 
 repositories {
-    // Use jcenter for resolving your dependencies.
+    // Use maven central for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -32,19 +33,22 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
+application {
+    // Define the main class for the application
+    mainClass = 'goroutine.analyzer.MainWindow'
+}
+
 distTar {
     compression = Compression.GZIP
     archiveExtension = "tar.gz"
 }
 
-// Define the main class for the application
-mainClassName = 'goroutine.analyzer.MainWindow'
-
 jar {
     manifest {
-        attributes 'Main-Class': mainClassName
+        attributes 'Main-Class': application.mainClass
     }
 }
+
 task copyDependencies(type: Copy) {
     from(configurations.runtimeClasspath).into("$buildDir/jars")
 }
@@ -68,7 +72,7 @@ tasks.jpackage {
     vendor = "app.org"
 
     mainJar = tasks.jar.archiveFile
-    mainClass = mainClassName
+    mainClass = application.mainClass
 
     javaOptions = ["-Dfile.encoding=UTF-8"]
 

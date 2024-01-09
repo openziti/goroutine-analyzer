@@ -14,7 +14,7 @@ public class StackDumpParser {
     private StackElement elem = null;
 
     public void processLine(String line) {
-        if (line.trim().length() == 0) {
+        if (line.trim().isEmpty()) {
             return;
         }
 
@@ -57,8 +57,14 @@ public class StackDumpParser {
                 }
                 elem.receiver = firstLineMatcher.group(4);
                 elem.method = firstLineMatcher.group(5);
+                if (elem.createdBy) {
+                    var inGoroutineIdx = elem.method.indexOf("in goroutine");
+                    if (inGoroutineIdx > 0) {
+                        elem.method = elem.method.substring(0, inGoroutineIdx);
+                    }
+                }
                 var args = firstLineMatcher.group(6);
-                if (args != null && args.trim().length() > 0) {
+                if (args != null && !args.trim().isEmpty()) {
                     for (var arg : args.split(",")) {
                         elem.args.add(arg.trim());
                     }

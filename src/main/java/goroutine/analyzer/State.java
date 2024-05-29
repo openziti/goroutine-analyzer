@@ -2,6 +2,7 @@ package goroutine.analyzer;
 
 public enum State {
     Running,
+    Runnable,
     Sleep,
     Select,
     IOWait,
@@ -16,6 +17,8 @@ public enum State {
         switch (state) {
             case "running" :
                 return Running;
+            case "runnable" :
+                return Runnable;
             case "sleep":
                 return Sleep;
             case "select":

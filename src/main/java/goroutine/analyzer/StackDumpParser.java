@@ -27,6 +27,9 @@ public class StackDumpParser {
             if (startMatcher.groupCount() == 4 && startMatcher.group(4) != null) {
                 time = Integer.parseInt(startMatcher.group(4));
             }
+            // a pending element here means the previous goroutine's last frame had no
+            // source line; drop it rather than letting it consume this goroutine's first frame
+            elem = null;
             current = new Stack(null, id, state, time, line);
             stacks.add(current);
 

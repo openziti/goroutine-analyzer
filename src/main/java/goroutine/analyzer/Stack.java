@@ -44,13 +44,19 @@ public class Stack implements TreeElement, Comparable<Stack> {
         return true;
     }
 
+    private static boolean matches(Predicate<String> matcher, String value) {
+        return value != null && matcher.test(value);
+    }
+
     public boolean matches(Predicate<String> matcher) {
-        if (matcher.test(header.header)) {
+        if (matches(matcher, header.header)) {
             return true;
         }
 
         for (var elem : elements) {
-            if (matcher.test(elem.codeLine) || matcher.test(elem.sourceLine)) {
+            // sourceLine is null for elements from a truncated dump, where the code line
+            // was parsed but the file:line that follows it was never read
+            if (matches(matcher, elem.codeLine) || matches(matcher, elem.sourceLine)) {
                 return true;
             }
         }

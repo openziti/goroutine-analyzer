@@ -132,7 +132,9 @@ public class MainWindow {
                     doc.insertString(doc.getLength(), stack.header.header + "\n", headerStyle);
                     for (var elem : stack.elements) {
                         doc.insertString(doc.getLength(), elem.codeLine + "\n", bodyStyle);
-                        doc.insertString(doc.getLength(), elem.sourceLine + "\n", bodyStyle);
+                        if (elem.sourceLine != null) {
+                            doc.insertString(doc.getLength(), elem.sourceLine + "\n", bodyStyle);
+                        }
                     }
                     doc.insertString(doc.getLength(), "\n", headerStyle);
                     if (count++ > maxCount) {
